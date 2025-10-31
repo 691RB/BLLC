@@ -1,9 +1,9 @@
-import { GoogleGenAI } from "@google/genai";
-import type { VercelRequest, VercelResponse } from "@vercel/node";
+import { GoogleAI } from "@google/genai";
 import fs from "node:fs";
 import path from "node:path";
 
-const MODEL = "gemini-flash-lite-latest"; // fast + supports grounding
+const MODEL = "gemini-flash-lite-latest";
+
 // Reads ppart_identity.txt from the repo root on each request (small file; keeps it editable)
 function readIdentity(): string {
   const file = path.join(process.cwd(), "ppart_identity.txt");
@@ -19,7 +19,7 @@ function buildContext(saved?: Record<string, string>) {
   return lines.length ? lines.join("\n") : "(none)";
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(req: any, res: any) {
   if (req.method === "OPTIONS") {
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
@@ -33,7 +33,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const { action, input, elementKey, saved, ground } = req.body || {};
     if (!action) return res.status(400).json({ error: "Missing 'action'." });
 
-    const ai = new GoogleGenAI({}); // picks up GOOGLE_API_KEY from env (server-only)
+    const apiKey = process.env.GOOGLE_API_KEY;
+    if (!apiKey) return res.status(500).json({ error: "Missing GOOGLE_API_KEY env var." });
+
+    const ai = new GoogleAI({ apiKey });
     const identity = readIdentity();
 
     if (action === "ask") {
@@ -47,7 +50,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         `User says:\n${input}\n\n` +
         `Respond concisely with supportive, probing guidance. Offer concrete suggestions, examples, and reframes when helpful.`;
 
-      const tools = ground ? [{ googleSearch: {} }] : undefined; // enable grounding when requested
+      // Enable grounding via Google Search when requested
+      const tools = ground ? [{ googleSearch: {} }] : undefined;
 
       const response = await ai.models.generateContent({
         model: MODEL,
@@ -62,12 +66,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const cand = (response as any).candidates?.[0];
       const gm = cand?.groundingMetadata;
       const chunks = gm?.groundingChunks as any[] | undefined;
-      const supports = gm?.groundingSupports as any[] | undefined;
       const queries = gm?.webSearchQueries as string[] | undefined;
 
-      // Build a simple unique list of cited URIs (preserve first title)
       const citations =
-        chunks?.map((c) => c.web?.uri ? { uri: c.web.uri as string, title: c.web.title as string | undefined } : null)
+        chunks?.map((c) => (c.web?.uri ? { uri: c.web.uri as string, title: c.web.title as string | undefined } : null))
               ?.filter(Boolean) ?? [];
 
       return res.status(200).json({
