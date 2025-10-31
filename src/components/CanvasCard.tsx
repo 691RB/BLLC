@@ -20,20 +20,19 @@ export default function CanvasCard({ keyId, label, savedSummary, active, onClick
       if ((e.target as HTMLElement).tagName === "BUTTON") return;
       onClick();
     }}>
-      <h3 style={{ margin: 0, fontSize: 14, color: "var(--muted)", textTransform: "uppercase", letterSpacing: ".3px" }}>
-        {label}
-      </h3>
+      <h3 className="card-title">{label}</h3>
 
       <textarea
+        className="card-input"
         placeholder={`Write or paste notes for “${label}”…`}
-        style={{ width: "100%", minHeight: 120, resize: "vertical", border: "1px solid var(--border)", borderRadius: 10, padding: 10, background: "#fafafa" }}
         value={text}
         onChange={(e) => setText(e.target.value)}
       />
 
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+      <div className="row">
+        <div className="row-left">
           <button
+            className="btn btn-save"
             disabled={saving}
             onClick={async () => {
               if (!text.trim()) return;
@@ -41,23 +40,22 @@ export default function CanvasCard({ keyId, label, savedSummary, active, onClick
               try {
                 await onSave(keyId, text.trim());
                 setBadge("Saved ✓");
-              } catch (e) {
+              } catch {
                 setBadge("⚠️ Save failed");
               } finally {
                 setSaving(false);
               }
             }}
-            style={{ padding: "8px 12px", borderRadius: 10, border: "1px solid var(--border)", background: "#eefbf4", cursor: "pointer" }}
           >
             {saving ? "Saving…" : "Save"}
           </button>
-          <span style={{ fontSize: 12, color: "var(--ok)" }}>{badge}</span>
+          <span className="badge">{badge}</span>
         </div>
-        <span style={{ fontSize: 12, color: "var(--muted)" }}>{savedSummary ? "Summary saved" : "No summary yet"}</span>
+        <span className="muted">{savedSummary ? "Summary saved" : "No summary yet"}</span>
       </div>
 
       {savedSummary && (
-        <p style={{ marginTop: 8, fontSize: 13, color: "var(--muted)" }}>
+        <p style={{ marginTop: 8, fontSize: 13 }} className="muted">
           <em>{savedSummary}</em>
         </p>
       )}
