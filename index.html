@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Possibility Lab — Possibility Finding</title>
+  <style>
+    :root {
+      --bg: #f7f7f9;
+      --card: #ffffff;
+      --ink: #1f2227;
+      --muted: #6b7280;
+      --accent: #4f46e5;
+      --ok: #059669;
+      --ring: rgba(79,70,229,.2);
+      --border: #e5e7eb;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+    header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      background: #fff;
+      display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap;
+    }
+    header h1 { font-size: 18px; margin: 0; }
+    header .sub { color: var(--muted); font-size: 14px; }
+    main {
+      display: grid;
+      grid-template-columns: 1.3fr .7fr;
+      gap: 16px;
+      padding: 16px;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(280px, 1fr));
+      gap: 12px;
+      align-content: start;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      display: grid; gap: 8px;
+      position: relative;
+    }
+    .card.active { outline: 3px solid var(--ring); }
+    .card h3 { margin: 0; font-size: 14px; letter-spacing: .3px; text-transform: uppercase; color: var(--muted); }
+    textarea {
+      width: 100%; min-height: 120px; resize: vertical;
+      border: 1px solid var(--border); border-radius: 10px; padding: 10px;
+      font: inherit; background: #fafafa;
+    }
+    .row { display: flex; gap: 8px; align-items: center; justify-content: space-between; }
+    .left { display: flex; gap: 8px; align-items: center; }
+    button {
+      border: 1px solid var(--border);
+      background: #fff;
+      padding: 8px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      font: inherit;
+    }
+    button.save { background: #eefbf4; border-color: #c7f0dc; }
+    .badge {
+      font-size: 12px; color: var(--ok);
+    }
+    .muted { color: var(--muted); }
+    .assistant {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      display: grid; grid-template-rows: 1fr auto; gap: 10px; height: calc(100vh - 120px);
+    }
+    .chat {
+      overflow: auto; display: grid; gap: 10px; padding-right: 4px;
+    }
+    .msg { padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border); background: #fff; }
+    .msg.user { background: #f2f4ff; border-color: #dfe3ff; }
+    .msg.assistant { background: #f8fafc; }
+    .composer { display: flex; gap: 8px; }
+    .composer input {
+      flex: 1; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border);
+      font: inherit; background: #fff;
+    }
+    .ask {
+      background: var(--accent); color: #fff; border-color: var(--accent);
+    }
+    .tiny { font-size: 12px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Possibility Finding</h1>
+    <div class="sub">Non-linear assistant: Ask anywhere, Save summaries per element</div>
+  </header>
+
+  <main>
+    <!-- Left: Canvas cards -->
+    <section class="grid" id="canvas">
+      <!-- Cards are data-driven; see JS below for keys -->
+    </section>
+
+    <!-- Right: Possibility Partner assistant -->
+    <aside class="assistant">
+      <div class="chat" id="chat"></div>
+
+      <div class="composer">
+        <input id="askInput" placeholder="Ask the Possibility Partner…" />
+        <button id="askBtn" class="ask">Ask</button>
+      </div>
+      <div class="tiny muted">Model: <code>gemini-flash-lite-latest</code>. Identity from <code>ppart_identity.txt</code> (server-side).</div>
+    </aside>
+  </main>
+
+  <script>
+    // --- State ---
+    const KEYS = [
+      { key: "what", label: "What is the Problem or Need?" },
+      { key: "who", label: "Who are you helping?" },
+      { key: "why", label: "Why does solving this matter?" },
+      { key: "how", label: "How will the assistant address it?" },
+      { key: "contribution", label: "What contribution will your assistant make?" },
+      { key: "name", label: "Assistant Name" }
+    ];
+    const saved = {};           // { key: summary }
+    let activeKey = null;       // "what" | "who" | ...
+
+    // --- DOM helpers ---
+    const $ = (sel, el=document) => el.querySelector(sel);
+    const $$ = (sel, el=document) => [...el.querySelectorAll(sel)];
+    const chatEl = $('#chat');
+    const canvasEl = $('#canvas');
+    const inputEl = $('#askInput');
+    const askBtn = $('#askBtn');
+
+    function renderCanvas() {
+      canvasEl.innerHTML = '';
+      for (const {key, label} of KEYS) {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.dataset.key = key;
+        card.innerHTML = `
+          <h3>${label}</h3>
+          <textarea id="ta-${key}" placeholder="Write or paste notes for ‘${label}’…"></textarea>
+          <div class="row">
+            <div class="left">
+              <button class="save" data-key="${key}">Save</button>
+              <span id="badge-${key}" class="badge"></span>
+            </div>
+            <span class="muted tiny">${saved[key] ? 'Saved summary present' : 'No summary yet'}</span>
+          </div>
+        `;
+        card.addEventListener('click', (e) => {
+          if (e.target.closest('button')) return; // ignore clicks on buttons
+          setActive(key);
+        });
+        canvasEl.appendChild(card);
+      }
+      // Wire save buttons
+      $$('.save', canvasEl).forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const key = e.currentTarget.dataset.key;
+          const ta = $(`#ta-${key}`);
+          const text = (ta.value || '').trim();
+          if (!text) {
+            notify(`Nothing to save for “${key}”.`, 'assistant');
+            return;
+          }
+          await doSave(key, text);
+        });
+      });
+      // Initial active card
+      if (!activeKey && KEYS.length) setActive(KEYS[0].key);
+    }
+
+    function setActive(key) {
+      activeKey = key;
+      $$('.card', canvasEl).forEach(c => c.classList.toggle('active', c.dataset.key === key));
+    }
+
+    function appendMsg(text, who='assistant') {
+      const div = document.createElement('div');
+      div.className = `msg ${who}`;
+      div.textContent = text;
+      chatEl.appendChild(div);
+      chatEl.scrollTop = chatEl.scrollHeight;
+    }
+    const notify = appendMsg;
+
+    // --- Network calls ---
+    async function doAsk() {
+      const input = (inputEl.value || '').trim();
+      if (!input) return;
+      appendMsg(input, 'user');
+      inputEl.value = '';
+
+      try {
+        const res = await fetch('/api/ask.py', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'ask',
+            input,
+            elementKey: activeKey,
+            saved
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Request failed');
+        appendMsg(data.reply || '(no reply)');
+      } catch (err) {
+        appendMsg(`⚠️ ${err.message}`, 'assistant');
+      }
+    }
+
+    async function doSave(elementKey, text) {
+      try {
+        const res = await fetch('/api/ask.py', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'save',
+            input: text,
+            elementKey,
+            saved
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Save failed');
+        saved[elementKey] = data.summary || '';
+        const badge = $(`#badge-${elementKey}`);
+        if (badge) { badge.textContent = 'Saved ✓'; }
+        notify(`Saved ${elementKey}.`, 'assistant');
+      } catch (err) {
+        notify(`⚠️ ${err.message}`, 'assistant');
+      }
+    }
+
+    // --- Events ---
+    askBtn.addEventListener('click', doAsk);
+    inputEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doAsk(); }
+    });
+
+    // Init
+    renderCanvas();
+  </script>
+</body>
+</html>
