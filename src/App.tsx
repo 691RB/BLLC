@@ -33,14 +33,13 @@ export default function App() {
       {
         role: "assistant",
         text: res.reply || "(no reply)",
-        grounded: Boolean(res.grounded),
-        citations: res.citations,
-        queries: res.webSearchQueries,
+        grounded: Boolean((res as any).grounded),
+        citations: (res as any).citations,
+        queries: (res as any).webSearchQueries,
       },
     ]);
   }
 
-  // -------- Export --------
   function exportJSON() {
     const blob = new Blob(
       [JSON.stringify({ saved, messages, exportedAt: new Date().toISOString() }, null, 2)],
@@ -86,32 +85,37 @@ export default function App() {
     URL.revokeObjectURL(url);
   }
 
-  // -------- Render --------
   return (
     <>
-      <section className="grid" style={{ alignContent: "start" }}>
-        {KEYS.map(({ key, label }) => (
-          <CanvasCard
-            key={key}
-            keyId={key}
-            label={label}
-            active={active === key}
-            onClick={() => setActive(key)}
-            savedSummary={saved[key]}
-            onSave={saveElement}
-          />
-        ))}
-        <div className="card" style={{ gridColumn: "1 / -1", display: "flex", gap: 8 }}>
-          <button onClick={exportJSON} style={{ padding: "8px 12px", borderRadius: 10, border: "1px solid var(--border)", cursor: "pointer" }}>
-            Export JSON
-          </button>
-          <button onClick={exportMarkdown} style={{ padding: "8px 12px", borderRadius: 10, border: "1px solid var(--border)", cursor: "pointer" }}>
-            Export Markdown
-          </button>
-        </div>
-      </section>
+      <header className="app-header">
+        <h1 className="app-title">Possibility Finding</h1>
+        <div className="app-sub">Non-linear assistant • Grounding toggle • Export JSON/Markdown</div>
+      </header>
 
-      <AssistantPane messages={messages} onAsk={ask} />
+      <main className="app-main">
+        <div className="layout">
+          <section className="grid">
+            {KEYS.map(({ key, label }) => (
+              <CanvasCard
+                key={key}
+                keyId={key}
+                label={label}
+                active={active === key}
+                onClick={() => setActive(key)}
+                savedSummary={saved[key]}
+                onSave={saveElement}
+              />
+            ))}
+
+            <div className="card export-bar">
+              <button className="btn" onClick={exportJSON}>Export JSON</button>
+              <button className="btn" onClick={exportMarkdown}>Export Markdown</button>
+            </div>
+          </section>
+
+          <AssistantPane messages={messages} onAsk={ask} />
+        </div>
+      </main>
     </>
   );
 }
