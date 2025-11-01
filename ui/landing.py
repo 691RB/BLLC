@@ -1,7 +1,6 @@
 # ui/landing.py
 import streamlit as st
 
-# --- Inline SVG icons ---
 LIGHTBULB = """
 <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
   <path d="M9 18h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
@@ -31,7 +30,6 @@ def render_hero():
     )
 
 def render_feature_cards():
-    # Build each card as ONE html string so nesting is preserved.
     left_card = f"""
 <div class="lp-card">
   <div class="lp-badge">{LIGHTBULB}</div>
@@ -52,7 +50,6 @@ def render_feature_cards():
   </p>
 </div>
 """
-
     st.markdown('<div class="apl-container">', unsafe_allow_html=True)
     c1, c2 = st.columns([1, 1], gap="large")
     c1.markdown(left_card, unsafe_allow_html=True)
@@ -60,14 +57,7 @@ def render_feature_cards():
     st.markdown("</div>", unsafe_allow_html=True)
 
 def render_cta():
-    # Inline style guarantees no underline even before CSS loads.
-    st.markdown(
-        """
-<div class="lp-cta-wrap">
-  <a class="lp-cta" style="text-decoration:none" href="pages/2_Possibility.py">
-    Let's Build! <span class="lp-arrow">→</span>
-  </a>
-</div>
-        """,
-        unsafe_allow_html=True,
-    )
+    # Use Streamlit-native navigation so routing works on Cloud
+    st.markdown('<div class="lp-cta-wrap">', unsafe_allow_html=True)
+    st.page_link("pages/2_Possibility.py", label="Let's Build!  →")
+    st.markdown('</div>', unsafe_allow_html=True)
