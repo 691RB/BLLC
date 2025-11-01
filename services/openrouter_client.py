@@ -29,7 +29,7 @@ def chat_completions(
     model_slug = model or os.environ.get("OPENROUTER_MODEL", "").strip()
     if not model_slug:
         # Default to a Claude Sonnet if not provided; update if your account uses a different slug.
-        model_slug = "anthropic/claude-4.5-sonnet"
+        model_slug = "openai/gpt-4o"
 
     payload: Dict[str, Any] = {
         "model": model_slug,
