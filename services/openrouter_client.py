@@ -3,82 +3,87 @@ import json
 import requests
 from typing import List, Dict, Any, Optional, Union
 
-# Use the documented base URL; allow override via env if needed.
-OPENROUTER_API_URL = os.environ.get(
-    "OPENROUTER_BASE_URL",
-    "https://openrouter.ai/api/v1/chat/completions"
-)
+# -------- Streamlit Cloud secret access (safe fallback to env) ----------
+try:
+    import streamlit as st  # preferred on Streamlit Cloud
+    def _secret(name: str, default: str = "") -> str:
+        try:
+            v = st.secrets.get(name, default)
+        except Exception:
+            v = default
+        if isinstance(v, str):
+            return v.strip()
+        return default
+except Exception:
+    def _secret(name: str, default: str = "") -> str:
+        v = os.environ.get(name, default)
+        return v.strip() if isinstance(v, str) else default
 
-def _env(name: str, default: str = "") -> str:
-    v = os.environ.get(name)
-    return v.strip() if isinstance(v, str) else default
+# -------- Constants (force THIS model only) ------------------------------
+FORCED_MODEL = "openai/gpt-4.1-mini"  # use this model and this model only
+
+# Docs show this base URL
+# https://openrouter.ai/docs/api-reference/overview (Headers & endpoint)
+OPENROUTER_API_URL = _secret("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1/chat/completions")
+
 
 def get_openrouter_headers() -> Dict[str, str]:
     """
-    Builds headers per OpenRouter docs.
-    - Authorization is required.
-    - HTTP-Referer and X-Title are optional but recommended.
+    Build headers per OpenRouter docs:
+    - Authorization required
+    - Optional 'HTTP-Referer' and 'X-Title' for attribution
     """
-    api_key = _env("OPENROUTER_API_KEY")
+    api_key = _secret("OPENROUTER_API_KEY")
     if not api_key:
-        # Keep explicit to make misconfigurations obvious in Streamlit logs.
-        raise RuntimeError(
-            "OPENROUTER_API_KEY is not set. Add it in Streamlit → Settings → Secrets."
-        )
+        # Make misconfiguration obvious in Streamlit logs
+        raise RuntimeError("OPENROUTER_API_KEY is not set in Streamlit Secrets.")
 
-    site_url = _env("OPENROUTER_SITE_URL")  # e.g., your Streamlit share URL
-    app_name = _env("OPENROUTER_APP_NAME", "AI Possibility Lab")
+    site_url = _secret("OPENROUTER_SITE_URL", "")
+    app_name = _secret("OPENROUTER_APP_NAME", "AI Possibility Lab")
 
-    headers = {
+    headers: Dict[str, str] = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
-        # OpenRouter attribution headers (optional but helpful):
-        # If you don't know your final URL yet, you can omit this;
-        # once deployed, set OPENROUTER_SITE_URL to your public app URL.
-        **({"HTTP-Referer": site_url} if site_url else {}),
         "X-Title": app_name,
     }
-    # Some hosts add/expect 'Referer'; harmless to include both.
+    # Optional but recommended for rankings / attribution
     if site_url:
-        headers["Referer"] = site_url
+        headers["HTTP-Referer"] = site_url
+        headers["Referer"] = site_url  # harmless duplicate for some hosts
     return headers
+
 
 def _normalize_content(msg_content: Union[str, List[Dict[str, Any]]]) -> str:
     """
-    OpenRouter normalizes to OpenAI's Chat API; content is usually a string.
-    In rare cases (or via other endpoints), it may be a list of parts—join any text parts.
+    OpenRouter normalizes to OpenAI Chat; content is usually a string.
+    If it's a list of parts, join text parts.
     """
     if isinstance(msg_content, str):
         return msg_content
     if isinstance(msg_content, list):
         parts: List[str] = []
         for p in msg_content:
-            # Typical shape: {"type": "text", "text": "..."}
             if isinstance(p, dict) and p.get("type") == "text" and "text" in p:
                 parts.append(str(p["text"]))
         return "".join(parts).strip()
     return str(msg_content)
 
+
 def chat_completions(
     messages: List[Dict[str, Any]],
-    model: Optional[str] = None,
+    model: Optional[str] = None,          # ignored (we force FORCED_MODEL)
     temperature: float = 0.2,
     max_tokens: Optional[int] = None,
     user: Optional[str] = None,
-    enforce_json: bool = False,
+    enforce_json: bool = False,           # if True, ask for JSON outputs
     extra: Optional[Dict[str, Any]] = None,
 ) -> str:
     """
     Call OpenRouter Chat Completions and return assistant text.
-    - model: if omitted, uses OPENROUTER_MODEL or defaults to openai/gpt-4.1-mini
-    - enforce_json: if True, sets response_format={"type":"json_object"} (OpenAI+supported models)
-    - user: stable end-user id (recommended for abuse detection)
-    - extra: advanced params passthrough (e.g., tools, top_p, etc.)
+    Always uses FORCED_MODEL = 'openai/gpt-4.1-mini'.
     """
-    model_slug = (model or _env("OPENROUTER_MODEL") or "openai/gpt-4.1-mini").strip()
-
     payload: Dict[str, Any] = {
-        "model": model_slug,
+        "model": FORCED_MODEL,
         "messages": messages,
         "temperature": temperature,
     }
@@ -87,7 +92,7 @@ def chat_completions(
     if user:
         payload["user"] = user
     if enforce_json:
-        # Only supported by OpenAI + some models; harmlessly ignored by others.
+        # Supported by OpenAI models; ignored by others.
         payload["response_format"] = {"type": "json_object"}
     if extra:
         payload.update(extra)
@@ -100,18 +105,30 @@ def chat_completions(
             timeout=90,
         )
     except requests.RequestException as e:
-        return f"ERROR: Network/requests exception: {e}"
+        return f"ERROR: Network exception: {e}"
 
-    # Surface non-200s (OpenRouter returns useful JSON in many error cases).
     if r.status_code != 200:
+        # Return server JSON if possible for easier debugging on Streamlit Cloud
         try:
-            err = r.json()
-            return f"ERROR {r.status_code}: {json.dumps(err)}"
+            return "ERROR " + str(r.status_code) + ": " + json.dumps(r.json())[:1200]
         except Exception:
-            return f"ERROR {r.status_code}: {r.text}"
+            return "ERROR " + str(r.status_code) + ": " + r.text[:1200]
 
-    data = r.json()
+    # Parse success response
+    try:
+        data = r.json()
+    except ValueError:
+        return "ERROR: Non-JSON response from OpenRouter."
 
-    # Handle top-level API error field if present
     if isinstance(data, dict) and "error" in data:
-        return f"ERROR: {data[']()
+        # OpenRouter error shape
+        return "ERROR: " + json.dumps(data.get("error"))[:1200]
+
+    try:
+        choice0 = data["choices"][0]
+        msg = choice0.get("message", {})
+        content = msg.get("content", "")
+        return _normalize_content(content) or ""
+    except Exception:
+        # Avoid f-strings in error paths (prevents unterminated literal issues)
+        return "ERROR: Unexpected response shape: " + json.dumps(data)[:1200]
