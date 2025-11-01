@@ -12,7 +12,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# Use the label that matches your top nav list so the pill highlights correctly
+# Make sure the top pill highlights correctly
 render_top_nav(active="Possibility Finding")
 page_header("Possibility Finder", "Clarify WHAT, WHO, WHY, HOW, contribution, and name.")
 ensure_session_defaults()
@@ -30,6 +30,7 @@ with left:
         st.markdown('<div class="apl-card" style="padding:18px;">', unsafe_allow_html=True)
         col1, col2 = st.columns(2)
 
+        # Add unique keys to avoid StreamlitDuplicateElementId
         with col1:
             canvas["what"] = st.text_area(
                 "What", key="pf_what", value=canvas["what"], height=100,
@@ -62,14 +63,59 @@ with left:
         st.markdown("</div>", unsafe_allow_html=True)  # close .apl-card
     st.markdown("</div>", unsafe_allow_html=True)      # close .apl-container
 
+# ---------- Helpers to display chat output ----------
+def _normalize_messages(items):
+    """Best-effort normalization into [{'role','content'}, ...]"""
+    out = []
+    for it in items or []:
+        if isinstance(it, dict):
+            role = (it.get("role") or it.get("sender") or it.get("type") or "assistant").lower()
+            role = "user" if role in ("user", "human", "you") else "assistant"
+            content = it.get("content") or it.get("text") or it.get("message") or ""
+            if isinstance(content, (list, dict)):
+                content = str(content)
+            out.append({"role": role, "content": str(content)})
+        elif isinstance(it, (list, tuple)) and len(it) >= 2:
+            out.append({"role": "user", "content": str(it[0])})
+            out.append({"role": "assistant", "content": str(it[1])})
+        elif isinstance(it, str):
+            out.append({"role": "assistant", "content": it})
+    return out
+
+def gather_chat_history(key_base="possibility"):
+    """
+    Some chat widgets store messages in session_state rather than returning them.
+    We look for common keys and render whichever is present & longest.
+    """
+    candidates_keys = [
+        f"{key_base}_transcript",
+        f"{key_base}_history",
+        f"{key_base}_messages",
+        f"{key_base}_chat",
+        "chat_history",
+        "messages",
+        "transcript",
+    ]
+    candidates = []
+    for k in candidates_keys:
+        v = st.session_state.get(k)
+        if isinstance(v, list) and v:
+            candidates.append(_normalize_messages(v))
+    if candidates:
+        return max(candidates, key=len)
+    # fall back to our own transcript if we created one earlier
+    return st.session_state.get(f"{key_base}_transcript", [])
+
 # ---------- Right column: fixed chat window + widget ----------
 with right:
-    # Scrollable chat window that shows transcript
+    # Scrollable chat window that shows transcript (from widget or our fallback)
+    hist = gather_chat_history("possibility")
+
     st.markdown(
         '<div class="apl-card" style="height:420px; overflow:auto; padding:16px; margin-bottom:12px;">',
         unsafe_allow_html=True,
     )
-    for m in st.session_state.get("possibility_transcript", []):
+    for m in hist:
         who = "You" if m.get("role") == "user" else "Partner"
         st.markdown(
             f"<div style='margin:6px 0'><strong>{who}:</strong> {m.get('content','')}</div>",
@@ -77,14 +123,13 @@ with right:
         )
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # Existing widget (unchanged API). Capture its return and display above.
+    # Your existing widget. If it returns something, append it to our transcript.
     result = chat_widget(
         key="possibility",
         system_prompt=get_system_prompt("possibility"),
         title="Possibility Partner",
     )
 
-    # Be tolerant to different return shapes from chat_widget
     if result is not None:
         user_msg = None
         assistant_msg = None
@@ -96,10 +141,11 @@ with right:
         else:
             assistant_msg = str(result)
 
-        transcript = st.session_state.setdefault("possibility_transcript", [])
+        # Maintain our own transcript so we always have something to render.
+        transcript_key = "possibility_transcript"
+        transcript = st.session_state.setdefault(transcript_key, [])
         if user_msg:
             transcript.append({"role": "user", "content": user_msg})
         if assistant_msg:
             transcript.append({"role": "assistant", "content": assistant_msg})
-
         st.rerun()
