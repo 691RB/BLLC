@@ -71,8 +71,8 @@ body{ background: var(--sand)!important; }
   padding:14px 22px;
   border-radius:999px;
   text-decoration:none !important;
-  font-weight:700;
-  color:#fff !important;
+  font-weight:800;
+  color:#ffffff !important;
   border:0;
   box-shadow:0 8px 20px rgba(191,99,42,0.28);
   background:linear-gradient(180deg, #d38040, #b4632a);
