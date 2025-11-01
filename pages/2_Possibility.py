@@ -70,4 +70,36 @@ with right:
         unsafe_allow_html=True,
     )
     for m in st.session_state.get("possibility_transcript", []):
-        who = "You" if
+        who = "You" if m.get("role") == "user" else "Partner"
+        st.markdown(
+            f"<div style='margin:6px 0'><strong>{who}:</strong> {m.get('content','')}</div>",
+            unsafe_allow_html=True,
+        )
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # Existing widget (unchanged API). Capture its return and display above.
+    result = chat_widget(
+        key="possibility",
+        system_prompt=get_system_prompt("possibility"),
+        title="Possibility Partner",
+    )
+
+    # Be tolerant to different return shapes from chat_widget
+    if result is not None:
+        user_msg = None
+        assistant_msg = None
+        if isinstance(result, dict):
+            user_msg = result.get("user") or result.get("prompt")
+            assistant_msg = result.get("assistant") or result.get("reply") or result.get("response")
+        elif isinstance(result, (list, tuple)) and len(result) == 2:
+            user_msg, assistant_msg = result
+        else:
+            assistant_msg = str(result)
+
+        transcript = st.session_state.setdefault("possibility_transcript", [])
+        if user_msg:
+            transcript.append({"role": "user", "content": user_msg})
+        if assistant_msg:
+            transcript.append({"role": "assistant", "content": assistant_msg})
+
+        st.rerun()
