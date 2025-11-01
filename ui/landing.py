@@ -1,6 +1,6 @@
+# ui/landing.py
 import streamlit as st
 
-# --- Inline SVG icons (Lucide-like) ---
 LIGHTBULB = """
 <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
   <path d="M9 18h6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
@@ -17,19 +17,17 @@ ROCKET = """
 </svg>
 """
 
-
 def render_hero():
     st.markdown(
         """
-        <section class="lp-hero">
-          <h1 class="lp-title">AI Possibility Lab</h1>
-          <p class="lp-tagline">Build to Learn, Learn to Create</p>
-          <p class="lp-meta">Mary Lou Fulton College of Learning and Teaching Innovation | Arizona State University<br/>Created by R. Beghetto (2025)</p>
-        </section>
+<section class="lp-hero">
+  <h1 class="lp-title">AI Possibility Lab</h1>
+  <p class="lp-tagline">Build to Learn, Learn to Create</p>
+  <p class="lp-meta">Mary Lou Fulton College of Learning and Teaching Innovation | Arizona State University<br/>Created by R. Beghetto (2025)</p>
+</section>
         """,
         unsafe_allow_html=True,
     )
-
 
 def render_feature_cards():
     st.markdown('<div class="apl-container">', unsafe_allow_html=True)
@@ -57,37 +55,35 @@ def render_feature_cards():
 
     st.markdown('</div>', unsafe_allow_html=True)
 
-
 def render_journey():
     st.markdown(
         """
-        <section class="apl-container">
-          <h2 class="lp-journey-title">Your Journey</h2>
-          <div class="lp-journey">
-            <div class="lp-step"><span class="lp-step-icon">💡</span><span>Inspiration</span></div>
-            <div class="lp-connector"></div>
-            <div class="lp-step"><span class="lp-step-icon">🔍</span><span>Problem Finding</span></div>
-            <div class="lp-connector"></div>
-            <div class="lp-step"><span class="lp-step-icon">👥</span><span>Collaboration</span></div>
-            <div class="lp-connector"></div>
-            <div class="lp-step"><span class="lp-step-icon">🛡️</span><span>Bot Identity</span></div>
-            <div class="lp-connector"></div>
-            <div class="lp-step"><span class="lp-step-icon">🛠️</span><span>UI Design</span></div>
-            <div class="lp-connector"></div>
-            <div class="lp-step"><span class="lp-step-icon">✨</span><span>Deployment</span></div>
-          </div>
-        </section>
+<section class="apl-container">
+  <h2 class="lp-journey-title">Your Journey</h2>
+  <div class="lp-journey">
+    <div class="lp-step"><span class="lp-step-icon">💡</span><span>Inspiration</span></div>
+    <div class="lp-connector"></div>
+    <div class="lp-step"><span class="lp-step-icon">🔍</span><span>Problem Finding</span></div>
+    <div class="lp-connector"></div>
+    <div class="lp-step"><span class="lp-step-icon">👥</span><span>Collaboration</span></div>
+    <div class="lp-connector"></div>
+    <div class="lp-step"><span class="lp-step-icon">🛡️</span><span>Bot Identity</span></div>
+    <div class="lp-connector"></div>
+    <div class="lp-step"><span class="lp-step-icon">🛠️</span><span>UI Design</span></div>
+    <div class="lp-connector"></div>
+    <div class="lp-step"><span class="lp-step-icon">✨</span><span>Deployment</span></div>
+  </div>
+</section>
         """,
         unsafe_allow_html=True,
     )
 
-
 def render_cta():
     st.markdown(
         """
-        <div class="lp-cta-wrap">
-          <a class="lp-cta" href="2_Possibility.py">Let's Build! <span class="lp-arrow">→</span></a>
-        </div>
+<div class="lp-cta-wrap">
+  <a class="lp-cta" href="pages/2_Possibility.py">Let's Build! <span class="lp-arrow">→</span></a>
+</div>
         """,
         unsafe_allow_html=True,
     )
