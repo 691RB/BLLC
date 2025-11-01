@@ -2,12 +2,8 @@
 import pathlib
 import streamlit as st
 
-CSS_CACHE_KEY = "__apl_css_injected__"
-
 def render_global_head():
-    if st.session_state.get(CSS_CACHE_KEY):
-        return
-
+    # Always (re)inject to avoid stale sessions on Cloud
     st.markdown(
         """
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,8 +16,7 @@ def render_global_head():
 
     css_path = pathlib.Path(__file__).with_name("theme.css")
     try:
-        st.markdown(f"<style>{css_path.read_text(encoding='utf-8')}</style>", unsafe_allow_html=True)
-    except FileNotFoundError:
-        pass
-
-    st.session_state[CSS_CACHE_KEY] = True
+        css = css_path.read_text(encoding="utf-8")
+        st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
+    except Exception as e:
+        st.warning(f"Theme CSS not found: {e}")
