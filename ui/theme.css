@@ -64,19 +64,36 @@ body{ background: var(--sand)!important; }
 .lp-card-text{ font-size:16px; color:#594e44; line-height:1.55; }
 
 /* CTA */
-/* Style the CTA page_link inside the CTA wrapper */
-.lp-cta-wrap [data-testid="stPageLink"]{
-  display:inline-flex; align-items:center; gap:8px;
-  padding:14px 22px; border-radius:999px;
-  text-decoration:none !important; font-weight:700;
-  color:#fff !important; border:0;
+/* Make st.page_link look like an orange CTA by default */
+[data-testid="stPageLink"]{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:14px 22px;
+  border-radius:999px;
+  text-decoration:none !important;
+  font-weight:700;
+  color:#fff !important;
+  border:0;
   box-shadow:0 8px 20px rgba(191,99,42,0.28);
   background:linear-gradient(180deg, #d38040, #b4632a);
 }
-.lp-cta-wrap [data-testid="stPageLink"]:hover{
+[data-testid="stPageLink"]:hover{
   transform: translateY(-1px);
   box-shadow:0 12px 24px rgba(191,99,42,0.38);
 }
+#.lp-cta-wrap [data-testid="stPageLink"]{
+ # display:inline-flex; align-items:center; gap:8px;
+  #padding:14px 22px; border-radius:999px;
+  #text-decoration:none !important; font-weight:700;
+  #color:#fff !important; border:0;
+  #box-shadow:0 8px 20px rgba(191,99,42,0.28);
+  #background:linear-gradient(180deg, #d38040, #b4632a);
+#}
+#.lp-cta-wrap [data-testid="stPageLink"]:hover{
+ # transform: translateY(-1px);
+ # box-shadow:0 12px 24px rgba(191,99,42,0.38);
+#}
 
 
 @media (max-width: 900px){
