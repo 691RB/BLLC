@@ -78,3 +78,33 @@ body{ background: var(--sand)!important; }
   .lp-title{ font-size:40px; }
   .lp-hero{ padding:28px 18px; }
 }
+
+/* Horizontal top nav pills (targets st.page_link in the main body) */
+[data-testid="stPageLink"]{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 14px;
+  border-radius:999px;
+  border:1px solid #e6dfd7;
+  background:#fff;
+  color: var(--ink) !important;
+  text-decoration:none !important;
+  font-weight:600;
+  box-shadow:0 2px 0 rgba(0,0,0,0.02);
+}
+[data-testid="stPageLink"]:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.04);
+}
+[data-testid="stPageLink"][aria-current="page"]{
+  background:#f5ebe3;
+  color: var(--terracotta-600) !important;
+  border-color:#ecd9c9;
+}
+
+/* Optional: hide the default sidebar nav to keep only the top pills */
+[data-testid="stSidebar"]{
+  display:none !important;
+}
+
