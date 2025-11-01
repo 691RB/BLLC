@@ -2,6 +2,7 @@
 import streamlit as st
 from ui.nav import render_top_nav
 from ui.header import page_header
+from ui.landing import render_hero
 from utils.state import ensure_session_defaults
 from services.ai import get_system_prompt
 from ui.chat import chat_widget
