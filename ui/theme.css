@@ -29,11 +29,7 @@ body{ background: var(--sand)!important; }
 
 /* Make Streamlit page links render as horizontal pills */
 .apl-nav{ display:flex; gap:18px; align-items:center; flex-wrap:wrap; }
-
-/* Each st.page_link is wrapped in a container; style that wrapper inline-flex */
-.apl-nav > *{ display:inline-flex; }
-
-/* Style the actual anchor rendered by st.page_link */
+.apl-nav > *{ display:inline-flex; }            /* wrapper each page_link sits in */
 .apl-nav > * a{
   display:inline-flex; align-items:center; gap:8px;
   padding:10px 14px; border-radius:999px; border:1px solid #e6dfd7;
@@ -41,8 +37,6 @@ body{ background: var(--sand)!important; }
   box-shadow:0 2px 0 rgba(0,0,0,0.02);
 }
 .apl-nav > * a:hover{ transform:translateY(-1px); box-shadow:0 4px 8px rgba(0,0,0,0.04); }
-
-/* Active pill */
 .apl-nav > * a[aria-current="page"]{
   background:#f5ebe3; color: var(--terracotta-600); border-color:#ecd9c9;
 }
@@ -73,7 +67,7 @@ body{ background: var(--sand)!important; }
 .lp-cta-wrap{ display:flex; align-items:center; justify-content:center; padding: 8px 0 36px; }
 .lp-cta{
   display:inline-flex; align-items:center; gap:8px; padding:14px 22px;
-  border-radius:999px; text-decoration:none; font-weight:700; color:#fff;
+  border-radius:999px; text-decoration:none; font-weight:700; color:#fff !important;
   box-shadow:0 8px 20px rgba(191,99,42,0.28);
   background:linear-gradient(180deg, #d38040, #b4632a);
 }
