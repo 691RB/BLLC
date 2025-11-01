@@ -10,15 +10,13 @@ PAGES = [
 ]
 
 def render_top_nav(active: str = "Landing"):
-    # Open our topbar + row wrapper
-    st.markdown(
-        '<div class="apl-topbar"><div class="apl-topbar-inner"><div class="apl-nav-row">',
-        unsafe_allow_html=True,
-    )
+    # Topbar wrapper (styled in theme.css)
+    st.markdown('<div class="apl-topbar"><div class="apl-topbar-inner">', unsafe_allow_html=True)
 
-    # Streamlit-native links (correct routing), now inside our flex row
-    for label, path, icon in PAGES:
-        st.page_link(path, label=label, icon=icon)
+    # 5 equal columns → perfect horizontal row + even spacing
+    cols = st.columns([1, 1, 1, 1, 1], gap="medium")
+    for col, (label, path, icon) in zip(cols, PAGES):
+        with col:
+            st.page_link(path, label=label, icon=icon)
 
-    # Close wrappers
-    st.markdown("</div></div></div>", unsafe_allow_html=True)
+    st.markdown('</div></div>', unsafe_allow_html=True)
