@@ -14,6 +14,7 @@ st.set_page_config(
 
 # Make sure the top pill highlights correctly
 render_top_nav(active="Possibility Finding")
+render_hero()
 page_header("Possibility Finder", "Clarify WHAT, WHO, WHY, HOW, contribution, and name.")
 ensure_session_defaults()
 
