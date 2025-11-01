@@ -16,51 +16,67 @@ body{ background: var(--sand)!important; }
 .apl-container{ max-width:1120px; margin:0 auto; padding:24px; }
 
 /* Top bar */
-.apl-topbar{ position:sticky; top:0; z-index:20; backdrop-filter:saturate(150%) blur(8px);
-  background: rgba(245,242,237,0.72); border-bottom:1px solid var(--stone); }
-.apl-topbar-inner{ max-width:1120px; margin:0 auto; display:flex; justify-content:flex-end; padding:14px 20px; }
-.apl-nav{ display:flex; gap:18px; }
+.apl-topbar{
+  position:sticky; top:0; z-index:20;
+  backdrop-filter:saturate(150%) blur(8px);
+  background: rgba(245,242,237,0.72);
+  border-bottom:1px solid var(--stone);
+}
+.apl-topbar-inner{
+  max-width:1120px; margin:0 auto;
+  display:flex; justify-content:flex-end; padding:14px 20px;
+}
 
-/* Style Streamlit page links as pills. We target anchors inside our .apl-nav container. */
-.apl-nav a{
+/* Make Streamlit page links render as horizontal pills */
+.apl-nav{ display:flex; gap:18px; align-items:center; flex-wrap:wrap; }
+
+/* Each st.page_link is wrapped in a container; style that wrapper inline-flex */
+.apl-nav > *{ display:inline-flex; }
+
+/* Style the actual anchor rendered by st.page_link */
+.apl-nav > * a{
   display:inline-flex; align-items:center; gap:8px;
   padding:10px 14px; border-radius:999px; border:1px solid #e6dfd7;
   background:#fff; color: var(--ink); text-decoration:none; font-weight:600;
   box-shadow:0 2px 0 rgba(0,0,0,0.02);
 }
-.apl-nav a:hover{ transform:translateY(-1px); box-shadow:0 4px 8px rgba(0,0,0,0.04); }
-.apl-nav a[aria-current="page"]{
+.apl-nav > * a:hover{ transform:translateY(-1px); box-shadow:0 4px 8px rgba(0,0,0,0.04); }
+
+/* Active pill */
+.apl-nav > * a[aria-current="page"]{
   background:#f5ebe3; color: var(--terracotta-600); border-color:#ecd9c9;
 }
 
 /* Hero */
-.lp-hero{ margin:16px auto 18px; background:#fff; border-radius:var(--radius-xl);
-  box-shadow:var(--shadow); padding:40px 28px; text-align:center; }
+.lp-hero{
+  margin:16px auto 18px; background:#fff; border-radius:var(--radius-xl);
+  box-shadow:var(--shadow); padding:40px 28px; text-align:center;
+}
 .lp-title{ font-size:56px; line-height:1.1; font-weight:800; color:var(--terracotta); margin:6px 0; }
 .lp-tagline{ font-size:20px; font-style:italic; font-weight:600; color:#915632; margin:2px 0 8px; }
 .lp-meta{ font-size:14px; color:#7a6f64; opacity:.9; margin-top:6px; }
 
 /* Two feature cards */
-.lp-card{ background:#fff; border-radius:var(--radius-xl); box-shadow:var(--shadow); padding:28px; text-align:center; }
-.lp-badge{ width:84px; height:84px; border-radius:50%; margin:6px auto 14px;
+.lp-card{
+  background:#fff; border-radius:var(--radius-xl); box-shadow:var(--shadow);
+  padding:28px; text-align:center;
+}
+.lp-badge{
+  width:84px; height:84px; border-radius:50%; margin:6px auto 14px;
   display:grid; place-items:center; color:#445544;
-  background: radial-gradient(circle at 40% 40%, var(--sage) 0%, var(--sage-700) 100%); }
+  background: radial-gradient(circle at 40% 40%, var(--sage) 0%, var(--sage-700) 100%);
+}
 .lp-card-title{ font-size:22px; color:var(--terracotta-600); margin:4px 0 6px; }
 .lp-card-text{ font-size:16px; color:#594e44; line-height:1.55; }
 
-/* Journey timeline */
-.lp-journey-title{ text-align:center; font-size:28px; color:var(--terracotta-600); margin:30px 0 14px; font-weight:800; }
-.lp-journey{ display:flex; align-items:center; justify-content:center; gap:14px; flex-wrap:wrap; padding:6px 8px 22px; }
-.lp-step{ display:flex; flex-direction:column; align-items:center; gap:6px; background:#fff;
-  border:1px solid #ecd9c9; border-radius:16px; padding:14px 16px; min-width:132px;
-  box-shadow:0 2px 10px rgba(0,0,0,0.04); font-weight:600; color:#9a5a2f; }
-.lp-step-icon{ font-size:18px; }
-.lp-connector{ width:46px; height:2px; background:linear-gradient(90deg, #e6b392, #b7743e); border-radius:1px; }
-
 /* CTA */
-.lp-cta-wrap{ display:flex; align-items:center; justify-content:center; padding:8px 0 36px; }
-.lp-cta{ display:inline-flex; align-items:center; gap:8px; padding:14px 22px; border-radius:999px; text-decoration:none; font-weight:700; color:#fff;
-  box-shadow:0 8px 20px rgba(191,99,42,0.28); background:linear-gradient(180deg, #d38040, #b4632a); }
+.lp-cta-wrap{ display:flex; align-items:center; justify-content:center; padding: 8px 0 36px; }
+.lp-cta{
+  display:inline-flex; align-items:center; gap:8px; padding:14px 22px;
+  border-radius:999px; text-decoration:none; font-weight:700; color:#fff;
+  box-shadow:0 8px 20px rgba(191,99,42,0.28);
+  background:linear-gradient(180deg, #d38040, #b4632a);
+}
 .lp-cta:hover{ transform:translateY(-1px); box-shadow:0 12px 24px rgba(191,99,42,0.38); }
 .lp-arrow{ display:inline-block; }
 
