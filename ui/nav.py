@@ -10,12 +10,8 @@ PAGES = [
 ]
 
 def render_top_nav(active: str = "Landing"):
-    # container that our CSS targets
-    st.markdown('<div class="apl-topbar"><div class="apl-topbar-inner"><nav class="apl-nav">', unsafe_allow_html=True)
-
-    # Use Streamlit-native links so navigation is correct and instantaneous
-    # (this runs the target page just like the sidebar nav). :contentReference[oaicite:2]{index=2}
-    for label, path, icon in PAGES:
-        st.page_link(path, label=label, icon=icon)
-
-    st.markdown('</nav></div></div>', unsafe_allow_html=True)
+    # one responsive row; pills styled via CSS in theme.css
+    cols = st.columns(len(PAGES), gap="small")
+    for col, (label, path, icon) in zip(cols, PAGES):
+        with col:
+            st.page_link(path, label=label, icon=icon)
