@@ -108,3 +108,40 @@ body{ background: var(--sand)!important; }
   display:none !important;
 }
 
+/* Flex row for top navigation with perfectly even gaps */
+.apl-nav-row{
+  display:flex;
+  align-items:center;
+  justify-content:center;   /* center the whole row */
+  gap:24px;                 /* <-- equal spacing between pills */
+  flex-wrap:wrap;           /* wrap on small screens */
+}
+
+/* Each st.page_link is wrapped; keep wrappers inline-flex */
+.apl-nav-row > *{ display:inline-flex; }
+
+/* Style the actual page link as a pill */
+.apl-nav-row [data-testid="stPageLink"]{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 14px;
+  border-radius:999px;
+  border:1px solid #e6dfd7;
+  background:#fff;
+  color: var(--ink) !important;
+  text-decoration:none !important;
+  font-weight:600;
+  box-shadow:0 2px 0 rgba(0,0,0,0.02);
+}
+.apl-nav-row [data-testid="stPageLink"]:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.04);
+}
+.apl-nav-row [data-testid="stPageLink"][aria-current="page"]{
+  background:#f5ebe3;
+  color: var(--terracotta-600) !important;
+  border-color:#ecd9c9;
+}
+
+
