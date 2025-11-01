@@ -57,7 +57,10 @@ def render_feature_cards():
     st.markdown("</div>", unsafe_allow_html=True)
 
 def render_cta():
+    a, b, c = st.columns([1, 2, 1])
+    with b:
+        st.page_link("pages/2_Possibility.py", label="Let's Build!  →")
     # Use Streamlit-native navigation so routing works on Cloud
-    st.markdown('<div class="lp-cta-wrap">', unsafe_allow_html=True)
-    st.page_link("pages/2_Possibility.py", label="Let's Build!  →")
-    st.markdown('</div>', unsafe_allow_html=True)
+    #st.markdown('<div class="lp-cta-wrap">', unsafe_allow_html=True)
+    #st.page_link("pages/2_Possibility.py", label="Let's Build!  →")
+    #st.markdown('</div>', unsafe_allow_html=True)
