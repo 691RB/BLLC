@@ -1,3 +1,4 @@
+# pages/1_Landing.py
 import streamlit as st
 from ui.nav import render_top_nav
 from ui.header import render_global_head
@@ -9,11 +10,8 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# Global head + top nav
 render_global_head()
 render_top_nav(active="Landing")
-
-# Landing content
 render_hero()
 render_feature_cards()
 render_journey()
