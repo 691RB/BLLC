@@ -63,26 +63,32 @@ body{ background: var(--sand)!important; }
 .lp-card-title{ font-size:22px; color:var(--terracotta-600); margin:4px 0 6px; }
 .lp-card-text{ font-size:16px; color:#594e44; line-height:1.55; }
 
-/* CTA — big, white, bold, centered pill */
-[data-testid="stPageLink"]{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:12px;
-  padding:14px 22px;             /* doubled from 14px 22px */
+/* Center the CTA row */
+.lp-cta-wrap{ display:flex; justify-content:center; align-items:center; padding:18px 0 36px; }
+
+/* Force CTA to be big, with WHITE, BOLD text (wins via higher specificity) */
+.lp-cta-zone [data-testid="stPageLink"]{
+  display:inline-flex; align-items:center; justify-content:center; gap:12px;
+  padding:28px 44px;                      /* ~2x size */
   border-radius:9999px;
-  text-decoration:none !important;
-  font-size:20px;                 /* bigger text */
-  font-weight:800;                /* bold */
-  color:#ffffff !important;       /* white text */
+  font-size:20px;
+  font-weight:800 !important;
+  color:#fff !important;                  /* white text */
+  -webkit-text-fill-color:#fff !important;/* belt & suspenders for Safari */
   border:0;
+  background:linear-gradient(180deg,#d98649,#b4632a);
   box-shadow:0 14px 32px rgba(191,99,42,0.32);
-  background:linear-gradient(180deg, #d98649, #b4632a);
 }
-[data-testid="stPageLink"]:hover{
-  transform: translateY(-1px);
+.lp-cta-zone [data-testid="stPageLink"] *{
+  color:#fff !important;
+  -webkit-text-fill-color:#fff !important;
+  font-weight:800 !important;
+}
+.lp-cta-zone [data-testid="stPageLink"]:hover{
+  transform:translateY(-1px);
   box-shadow:0 18px 40px rgba(191,99,42,0.40);
 }
+
 
 
 /* Responsive tweaks */
