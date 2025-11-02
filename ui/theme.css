@@ -69,7 +69,7 @@ body{ background: var(--sand)!important; }
   align-items:center;
   justify-content:center;
   gap:12px;
-  padding:28px 44px;             /* doubled from 14px 22px */
+  padding:14px 22px;             /* doubled from 14px 22px */
   border-radius:9999px;
   text-decoration:none !important;
   font-size:20px;                 /* bigger text */
